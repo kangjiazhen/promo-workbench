@@ -30,6 +30,13 @@ from property_promo.rendering.base import RenderResult
 
 pytest.importorskip("fastapi")
 
+# 这些测试都要真的编解码一段片子（质检测试没有 ffmpeg 就无从谈起），
+# 机器上没装就整体跳过，而不是红一片。
+pytestmark = pytest.mark.skipif(
+    shutil.which("ffmpeg") is None or shutil.which("ffprobe") is None,
+    reason="需要 ffmpeg / ffprobe（质检与抽帧都靠它）",
+)
+
 
 # ----------------------------------------------------------------- helpers
 def _ffmpeg(*args: str) -> None:

@@ -11,6 +11,7 @@ These tests cover the product contract, not the plumbing:
 from __future__ import annotations
 
 import io
+import shutil
 import time
 from pathlib import Path
 
@@ -361,6 +362,9 @@ def test_render_batch_is_idempotent(client):
     assert len(jobs) == 1
 
 
+@pytest.mark.skipif(
+    shutil.which("ffmpeg") is None, reason="桩渲染也要用 ffmpeg 编一段真 MP4"
+)
 def test_render_produces_a_playable_mp4_and_a_version(client, tmp_path):
     lid = _upload(client, "A", {"客厅": 3})
     r = client.post(f"/api/listings/{lid}/render", json={"aspect": "16:9"})

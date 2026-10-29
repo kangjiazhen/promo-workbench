@@ -32,6 +32,15 @@ jobs:
           pip install -e ".[dev]"
           pip install pytest pillow numpy
 
+      # 质检与抽帧要走真 ffmpeg；装不上时相关测试会自动 skip。
+      - name: Install ffmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install ffmpeg (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ffmpeg -y --no-progress
+
       - name: Shared constants in sync
         run: python scripts/sync_shared_constants.py --check
 
