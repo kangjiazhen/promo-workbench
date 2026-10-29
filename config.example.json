@@ -1,0 +1,7 @@
+{
+  "data_dir": "./data",
+  "renders_dir": "./data/renders",
+  "max_upload_mb": 30,
+  "max_photos_per_listing": 300,
+  "renderer": "auto"
+}

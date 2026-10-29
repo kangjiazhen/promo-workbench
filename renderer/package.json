@@ -1,0 +1,24 @@
+{
+  "name": "property-promo-renderer",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.tsx",
+    "render": "remotion render src/index.tsx PropertyPromo",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "render-job": "node render-job.mjs"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.484",
+    "@remotion/cli": "4.0.484",
+    "@remotion/renderer": "4.0.484",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "remotion": "4.0.484"
+  },
+  "devDependencies": {
+    "@types/react": "18.2.0",
+    "typescript": "^5.6.0"
+  }
+}

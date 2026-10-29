@@ -1,0 +1,107 @@
+/**
+ * GENERATED FILE — do not edit by hand.
+ * Source: shared/constants.json  (regenerate: python scripts/sync_shared_constants.py)
+ *
+ * 前后端共享口径：支持格式、路径深度、画幅、音乐、并发与上限。
+ */
+
+export const SHARED_CONSTANTS = {
+  "version": 1,
+  "note": "前后端共享口径的唯一来源。前端由 scripts/sync_shared_constants.py 生成为 web/src/lib/sharedConstants.ts，并由 tests/test_shared_constants.py 校验两者一致。",
+  "supported_image_exts": [
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp"
+  ],
+  "junk_names": [
+    ".ds_store",
+    "thumbs.db",
+    "desktop.ini"
+  ],
+  "junk_prefixes": [
+    "._"
+  ],
+  "path_depth": {
+    "listing_root": 3,
+    "room_segment": 1
+  },
+  "known_room_order": [
+    "客厅",
+    "客餐厅",
+    "主卧",
+    "次卧",
+    "卧室",
+    "书房",
+    "厨房",
+    "餐厅",
+    "卫生间",
+    "阳台",
+    "其他"
+  ],
+  "aspects": {
+    "16:9": {
+      "label": "16:9 横版",
+      "width": 1920,
+      "height": 1080
+    },
+    "9:16": {
+      "label": "9:16 竖版",
+      "width": 1080,
+      "height": 1920
+    },
+    "4:3": {
+      "label": "4:3 横版",
+      "width": 1440,
+      "height": 1080
+    },
+    "3:4": {
+      "label": "3:4 竖版",
+      "width": 1080,
+      "height": 1440
+    },
+    "1:1": {
+      "label": "1:1 方形",
+      "width": 1080,
+      "height": 1080
+    }
+  },
+  "default_aspect": "16:9",
+  "music": {
+    "max_mb": 20,
+    "exts": [
+      ".mp3",
+      ".m4a",
+      ".wav",
+      ".ogg"
+    ],
+    "modes": [
+      "none",
+      "synth",
+      "custom"
+    ]
+  },
+  "concurrency": {
+    "upload_default": 4,
+    "upload_max": 8,
+    "render_default": 2,
+    "render_max": 8,
+    "remotion_frame_concurrency": 2
+  },
+  "limits": {
+    "max_photos_per_listing": 300,
+    "max_upload_mb": 30,
+    "max_client_scan_files": 20000,
+    "max_batch_listings": 50,
+    "max_versions_per_listing": 20
+  },
+  "duration": {
+    "opener_s": 4.2,
+    "shot_min_s": 2.4,
+    "shot_max_s": 3.2,
+    "outro_s": 5.6
+  },
+  "lease_seconds": 30,
+  "progress_throttle_ms": 500,
+  "busy_timeout_ms": 5000
+} as const;

@@ -1,0 +1,25 @@
+[project]
+name = "promo-workbench"
+version = "1.0.0"
+description = "把一整个文件夹的照片批量变成宣传片：上传 → 选片 → 确认 → 并发渲染 → 版本化成片"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn>=0.27",
+  "python-multipart>=0.0.9",
+  "pillow>=10.0",
+  "numpy>=1.26",
+  "pydantic>=2.6",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "playwright>=1.40"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
