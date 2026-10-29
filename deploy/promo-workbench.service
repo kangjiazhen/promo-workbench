@@ -1,0 +1,35 @@
+[Unit]
+Description=promo-workbench API (FastAPI + render pool)
+Documentation=https://github.com/kangjiazhen/promo-workbench
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=promo
+Group=promo
+WorkingDirectory=/opt/promo-workbench
+
+# 只监听本机：对外一律走 Caddy/Nginx（TLS + 登录）。绝对不要把 8861 直接放到公网。
+Environment=PYTHONPATH=src
+Environment=PYTHONUNBUFFERED=1
+Environment=PROPERTY_PROMO_RENDERER=auto
+
+ExecStart=/opt/promo-workbench/.venv/bin/python -m uvicorn property_promo.api.app:app \
+    --host 127.0.0.1 --port 8861 --log-level warning
+
+Restart=on-failure
+RestartSec=5
+
+# 渲染会起 node + headless chromium 子进程：停服时把整个进程组一起收掉，
+# 否则会留下「渲染中」的僵尸作业（下次启动虽然会被清扫标记失败，但没必要）。
+KillMode=mixed
+TimeoutStopSec=60
+
+# 素材多、渲染吃 CPU：给一点余量，避免 OOM 直接杀 uvicorn
+Nice=5
+IOSchedulingClass=best-effort
+IOSchedulingPriority=6
+
+[Install]
+WantedBy=multi-user.target

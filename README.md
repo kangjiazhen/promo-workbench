@@ -213,7 +213,54 @@ python scripts/sync_shared_constants.py --check      # 前后端口径有没有�
 - 续传按（套 / 相对路径 / 字节数）判定：同路径同字节数但内容不同的极端情况按「已上传」跳过。
 - 片尾二维码只能是文字说明或你上传的现成图片（个人微信二维码无法仅凭微信号本地生成）。
 - 渲染并发上限 8；实测每路 Remotion 占 2 线程以上，建议 2–3。
-- Windows 上「打开所在文件夹」用 `os.startfile`，其他平台返回不支持。
+- Windows 上「打开所在文件夹」用 `os.startfile`，其他平台返回不支持（服务器部署见下一节）。
+
+---
+
+## 10. 部署到服务器（可选）
+
+默认用法是本机跑（`scripts/dev.ps1`），素材不出门。要多人共用或 7×24 出片，
+可以放到一台常开的机器上 —— 一台 4 核 8G 的云服务器就够，但**必须**补上登录、
+并且只让反代对外。
+
+```bash
+# 服务器上（Ubuntu 24.04 / Debian 12，Python ≥3.11、Node ≥20）
+sudo git clone https://github.com/kangjiazhen/promo-workbench /opt/promo-workbench
+cd /opt/promo-workbench
+sudo bash deploy/install.sh          # 装依赖 → venv → 前端 build → systemd 起服务
+```
+
+装完 uvicorn 只监听 `127.0.0.1:8861`，对外交给 Caddy：
+
+```bash
+caddy hash-password --plaintext '你的密码'
+sudo cp deploy/Caddyfile /etc/caddy/Caddyfile   # 改域名 + 上面那串哈希
+sudo systemctl reload caddy
+```
+
+仓库里的 `deploy/` 三件套：
+
+| 文件 | 作用 |
+|---|---|
+| `deploy/install.sh` | 幂等安装：系统依赖、venv、`pnpm build`、`promo` 用户、systemd 单元、自检 |
+| `deploy/promo-workbench.service` | systemd 单元（`KillMode=mixed`，停服时把 node/chromium 子进程一起收掉，不留僵尸作业） |
+| `deploy/Caddyfile` | TLS + Basic Auth + 静态前端 + `/api/*` 反代，单请求 64MB |
+| `deploy/backup.sh` | 备份：SQLite 用 `.backup`（WAL 下直接 cp 会拿到撕裂的库）+ 成片打包，按天老化 |
+
+服务器上要知道的几件事：
+
+- **必须登录**：API 没有鉴权，`/api/*` 一旦裸奔等于把素材库和 CPU 交给陌生人。用 Caddy 的
+  `basic_auth` 就够；要按人分账号再上 `oauth2-proxy`。
+- **「打开所在文件夹」用不了**（`os.startfile` 只在 Windows）。服务器上建议改成「打包下载 zip」。
+- **单实例**：渲染池在 API 进程内（`app.py` 的 lifespan 拉起 `worker_pool`），所以别开
+  `--workers 2`，也别横向扩多副本 —— SQLite + 进程内租约是按单机设计的。
+- **磁盘**：每套保留 20 个版本 × 约 27MB ≈ 540MB/套。十几套就是 8GB，云盘 40G 很快满；
+  把 `max_versions_per_listing` 调到 2–3，或定期清 `data/renders/`。
+- **带宽**：云服务器入方向（上传素材）通常免费不限速，出方向（别人看成片）才计费。
+  一部成片 27MB，5Mbps 带宽下缓冲要 40 多秒 —— 内网用没问题，公网给客户看就得提带宽或用 CDN。
+- **ICP 备案**：国内节点用域名走 80/443 要备案；没备案就先用 `IP:8443` 这类非标端口顶着。
+- **Linux 上的素材挂载**是软链接（Windows 上是 junction），`renderer/render-job.mjs` 对两者
+  都有判定；注意别用 `rmSync(recursive)` 去清它 —— 那条路径会穿过链接删掉源照片。
 
 ---
 
