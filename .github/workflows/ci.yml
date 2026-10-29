@@ -1,0 +1,58 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pip install pytest pillow numpy
+
+      - name: Shared constants in sync
+        run: python scripts/sync_shared_constants.py --check
+
+      - name: Pytest
+        env:
+          PYTHONPATH: src
+        run: python -m pytest tests -q
+
+      # 渲染器相关的三个测试在没有 renderer/node_modules 时会自动 skip；
+      # 这里装上依赖，让 bundle 缓存的死标记/新鲜度检查真的跑起来。
+      - name: Install renderer deps
+        working-directory: renderer
+        run: npm install --no-audit --no-fund
+
+      - name: Pytest with renderer deps
+        env:
+          PYTHONPATH: src
+        run: python -m pytest tests/test_bundle_cache.py tests/test_render_mounts.py -q
+
+      - name: Web typecheck
+        working-directory: web
+        run: |
+          npm install --no-audit --no-fund
+          npx tsc -b
